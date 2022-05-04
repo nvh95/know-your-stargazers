@@ -1,0 +1,40 @@
+{
+  "name": "know-your-stargazers",
+  "version": "0.0.1",
+  "description": "Know who starred your repository!",
+  "keywords": [
+    "stargazers",
+    "github"
+  ],
+  "homepage": "https://github.com/nvh95/know-your-stargazers#readme",
+  "bugs": {
+    "url": "https://github.com/nvh95/know-your-stargazers/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvh95/know-your-stargazers.git"
+  },
+  "license": "MIT",
+  "author": "nvh95",
+  "main": "bin/index.js",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --platform=node --target=node16 --external:./node_modules/* --outfile=bin/index.js",
+    "start": "npm run build && node bin/index.js",
+    "watch": "nodemon --watch index.ts --exec npm run start",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sort": "npx sort-package-json"
+  },
+  "dependencies": {
+    "@octokit/core": "^3.6.0",
+    "@types/node": "^17.0.31",
+    "axios": "^0.27.2",
+    "chalk": "^4.1.2",
+    "commander": "^9.2.0",
+    "dotenv": "^16.0.0",
+    "esbuild": "^0.14.38",
+    "inquirer": "^8.2.4",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2",
+    "typescript": "^4.6.4"
+  }
+}
