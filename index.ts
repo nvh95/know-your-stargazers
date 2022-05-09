@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Octokit } from '@octokit/core';
 import { RequestError } from '@octokit/request-error';
 import fs from 'fs';
@@ -78,13 +79,26 @@ interface StarListResult {
   stargazers: Stagazer[];
 }
 
-const actionHandler = () => {
+async function wait(seconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, seconds * 1000);
+  });
+}
+
+let OWNER = '';
+let REPO = '';
+let TOKEN = '';
+
+const actionHandler = async () => {
   console.log(
     'Welcome to know-your-stagazers, a library helps you have more insight about who starred your repositories.',
   );
+  await wait(0.5);
   console.log('Please follow the instructions to get started.');
-  const DEFAULT_TOKEN =
-    process.env.GITHUB_PERSONAL_ACCESS_TOKEN || 'ghp_something';
+  await wait(0.5);
+  const DEFAULT_TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || '';
   const DEFAULT_OWNER = process.env.GITHUB_OWNER || 'nvh95';
   const DEFAULT_REPO = process.env.GITHUB_REPO || 'jest-preview';
 
@@ -105,14 +119,14 @@ const actionHandler = () => {
       },
       {
         message:
-          'To effectively crawl your stargazers. You need to provide a GitHub Personal Access Token. You can get one from https://github.com/settings/tokens (No permission scopes needed). The rate limit with a token is 5000 requests per hours. Otherwise, it is 60 requests per hour.',
+          'What is your GitHub Persinal Access Token? \n(The rate limit with a token is 5000 requests per hours. Otherwise, it is 60 requests per hour. You can get one from https://github.com/settings/tokens (No permission scopes needed). (e.g: ghp_something))',
         name: 'token',
         type: 'input',
         default: DEFAULT_TOKEN,
       },
     ])
     .then(
-      ({
+      async ({
         owner,
         repo,
         token,
@@ -121,20 +135,29 @@ const actionHandler = () => {
         repo: string;
         token: string;
       }) => {
-        if (!token) {
+        OWNER = owner;
+        REPO = repo;
+        TOKEN = token;
+        if (!TOKEN) {
           console.warn(
             chalk.yellow(
-              'No Personal Access Token provided. You can get one at https://github.com/settings/tokens',
+              'No Personal Access Token provided. You can get one at https://github.com/settings/tokens.',
             ),
           );
+          console.warn(
+            chalk.yellow('Crawling with rate limit 60 requests per hour.'),
+          );
+          // Give user a some time to read the message
+          await wait(1.5);
         }
-        if (!owner || !repo) {
+        if (!OWNER || !REPO) {
           throw new Error(
             'Please provide the following environment variables, GITHUB_OWNER, GITHUB_REPO',
           );
         }
         // TODO: Detect cache, ask userif they want to clear cache
-
+        // We found that you are having cache on owner/repo. Do you want to use the cache? (YES/no)
+        // TODO: Check if repo existed
         function createDirIfNotExisted(dir: string) {
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, {
@@ -142,13 +165,13 @@ const actionHandler = () => {
             });
           }
         }
-        const CACHE_FOLDER = path.join('.cache', `${owner}-${repo}`);
+        const CACHE_FOLDER = path.join('.cache', `${OWNER}-${REPO}`);
         // Each repo has its own cache folder
         createDirIfNotExisted(CACHE_FOLDER);
 
         const CURRENT_PAGE_CACHE = path.join(CACHE_FOLDER, 'currentPage');
 
-        const OUTPUT_BASE = `${owner}-${repo}`;
+        const OUTPUT_BASE = `${OWNER}-${REPO}`;
         createDirIfNotExisted(OUTPUT_BASE);
         const OUTPUT_STARGAZERS = path.join(
           OUTPUT_BASE,
@@ -164,7 +187,7 @@ const actionHandler = () => {
         );
 
         const octokit = new Octokit({
-          auth: token,
+          auth: TOKEN,
         });
 
         function appendStargazersToFile(stargazers: Stagazer[]) {
@@ -190,7 +213,7 @@ const actionHandler = () => {
                 )}`,
               ),
             );
-            if (!token) {
+            if (!TOKEN) {
               console.log(
                 chalk.green(
                   `You can increase GitHub API rate limit to 5000 requests per hour by providing a personal access token via GITHUB_PERSONAL_ACCESS_TOKEN envionment variable.`,
@@ -220,7 +243,7 @@ const actionHandler = () => {
           try {
             const response = await octokit.request<Stagazer[]>({
               method: 'get',
-              url: `/repos/${owner}/${repo}/stargazers?page=${page}&per_page=100`,
+              url: `/repos/${OWNER}/${REPO}/stargazers?page=${page}&per_page=100`,
             });
             console.log(
               chalk.gray(
@@ -267,6 +290,7 @@ const actionHandler = () => {
             });
             return response.data;
           } catch (error) {
+            console.log(error);
             handleError(error);
           }
         }
@@ -311,7 +335,9 @@ const actionHandler = () => {
             fs.readFileSync(OUTPUT_STARGAZERS, 'utf8'),
           ) as Stagazer[];
 
-          const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 100;
+          // Default Batch if not provided, unauthenticated mode is 5, authenticated mode is 100
+          const BATCH_SIZE =
+            Number(process.env.BATCH_SIZE) || (TOKEN ? 100 : 5);
           const NUM_OF_BATCHS = Math.ceil(stargazers.length / BATCH_SIZE);
 
           let BATCH_INDEX_CACHE = 0;
@@ -323,6 +349,7 @@ const actionHandler = () => {
               ) + 1;
           }
 
+          // Fetch stargazers by batch to avoid losing all data when hitting the rate limit
           for (
             let batchIndex = BATCH_INDEX_CACHE;
             batchIndex < NUM_OF_BATCHS;
@@ -361,6 +388,8 @@ const actionHandler = () => {
               batchIndex.toString(),
             );
           }
+          // TODO: Remove duplicate stargazers
+          // by converting to object and convert back to array
           console.log(
             chalk.green(`Save all stargazers to ${OUTPUT_DETAILED_USERS}`),
           );

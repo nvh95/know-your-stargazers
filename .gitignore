@@ -197,3 +197,4 @@ dist
 .cache
 output.json
 /bin
+output_*.json
