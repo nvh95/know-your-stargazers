@@ -198,3 +198,4 @@ dist
 output.json
 /bin
 output_*.json
+.npmrc
