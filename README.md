@@ -29,6 +29,8 @@ npx know-your-stargazers
 
 `know-your-stargazers` uses [GitHub API](https://docs.github.com/en/rest) to crawl your stargazers (i.e: who starred your project). The default GitHub API rate limit is 60 requests per hour. By providing a personal access token, you can [increase the rate limit to 5000 requests per hour](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#requests-from-personal-accounts).
 
+URL: https://github.com/settings/tokens
+
 ## Environment Variables
 
 `know-your-stargazers` prefills the default values of `owner`, `repo` and `token` by looking for the following environment variables: `GITHUB_PERSONAL_ACCESS_TOKEN`, `GITHUB_OWNER` and `GITHUB_REPO`. You can set these environment variables in your `.env` file as well.
