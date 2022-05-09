@@ -1,6 +1,6 @@
 {
   "name": "know-your-stargazers",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha.0",
   "description": "Know who starred your repository!",
   "keywords": [
     "stargazers",
@@ -31,7 +31,9 @@
     "sort": "npx sort-package-json",
     "start": "npm run build && node bin/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "nodemon --watch index.ts --exec npm run start"
+    "watch": "nodemon --watch index.ts --exec npm run start",
+    "publish:alpha": "npm publish --tag alpha",
+    "publish:latest": "npm publish"
   },
   "dependencies": {
     "@octokit/core": "^3.6.0",
