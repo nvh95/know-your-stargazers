@@ -416,6 +416,13 @@ const actionHandler = async () => {
             OUTPUT_FOLLOWERS,
             JSON.stringify(userWithFollowers, null, 2),
           );
+          const topTen = userWithFollowers.slice(0, 10).map((user, index) => ({
+            rank: index + 1,
+            username: user.login,
+            numberOfFollowers: user.followers,
+          }));
+          console.log(chalk.bgWhite(`Top 10 Stagazers with most followers:`));
+          console.table(topTen);
           console.log(
             chalk.green(
               `Sort followers based on followers. Saved at ${OUTPUT_FOLLOWERS}`,
