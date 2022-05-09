@@ -112,7 +112,7 @@ const actionHandler = async () => {
       },
       {
         message:
-          'What is your GitHub Persinal Access Token? \n(The rate limit with a token is 5000 requests per hours. Otherwise, it is 60 requests per hour. You can get one from https://github.com/settings/tokens (No permission scopes needed). (e.g: ghp_something))',
+          'What is your GitHub Personal Access Token? \n(The rate limit with a token is 5000 requests per hours. Otherwise, it is 60 requests per hour. You can get one from https://github.com/settings/tokens (No permission scopes needed). (e.g: ghp_something))',
         name: 'token',
         type: 'input',
         default: DEFAULT_TOKEN,
