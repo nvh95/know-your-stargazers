@@ -10,6 +10,9 @@ Know more about who starred your repository 🕵️
   <img align="center" src="https://user-images.githubusercontent.com/8603085/167408030-7c0957dd-4434-403b-abf4-c002db260dc4.png" alt="Top ten stargazers with most followers for jest-preview" />
 </p>
 
+[![npm](https://img.shields.io/npm/v/know-your-stargazers)](https://www.npmjs.com/package/know-your-stargazers)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-green.svg)
+
 ## Why **know-your-stargazers**
 
 When developing an open source project, sometimes you are curious to know who starred your project. `know-your-stargazers` is a simple CLI program that will help you to know who are interested to your project.
