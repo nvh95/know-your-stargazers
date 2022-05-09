@@ -9,15 +9,6 @@ import inquirer from 'inquirer';
 import 'dotenv/config';
 import open from 'open';
 
-// TODO: Make an interactive app using inquirer and commander
-// Check if TOKEN/ OWNER/ REPO is set, otherwise, prompt to ask
-
-function addPersonToFile(persons: any) {
-  // Check if file is existed
-  // Query for additional information: number of followers
-  // For each person, check if they existed in the list => overwrite for newer data
-}
-
 interface Stagazer {
   login: string;
   id: number;
@@ -102,6 +93,8 @@ const actionHandler = async () => {
   const DEFAULT_OWNER = process.env.GITHUB_OWNER || 'nvh95';
   const DEFAULT_REPO = process.env.GITHUB_REPO || 'jest-preview';
 
+  // TODO: Get from cli arguments
+  // If not present, ask user to input
   inquirer
     .prompt([
       {
