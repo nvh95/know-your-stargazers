@@ -9,7 +9,7 @@ import inquirer from 'inquirer';
 import 'dotenv/config';
 import open from 'open';
 
-interface Stagazer {
+interface Stargazer {
   login: string;
   id: number;
   node_id: string;
@@ -67,7 +67,7 @@ interface User {
 
 interface StarListResult {
   hasNextPage: boolean;
-  stargazers: Stagazer[];
+  stargazers: Stargazer[];
 }
 
 async function wait(seconds: number) {
@@ -78,13 +78,21 @@ async function wait(seconds: number) {
   });
 }
 
+function createDirIfNotExisted(dir: string) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, {
+      recursive: true,
+    });
+  }
+}
+
 let OWNER = '';
 let REPO = '';
 let TOKEN = '';
 
 const actionHandler = async () => {
   console.log(
-    'Welcome to know-your-stagazers, a library helps you have more insight about who starred your repositories.',
+    'Welcome to know-your-stargazers, a library helps you have more insight about who starred your repositories.',
   );
   await wait(0.5);
   console.log('Please follow the instructions to get started.');
@@ -148,15 +156,23 @@ const actionHandler = async () => {
             'Please provide the following environment variables, GITHUB_OWNER, GITHUB_REPO',
           );
         }
-        // TODO: Detect cache, ask userif they want to clear cache
+
+        const octokit = new Octokit({
+          auth: TOKEN,
+        });
+
+        // TODO: Detect cache, ask user if they want to clear cache
         // We found that you are having cache on owner/repo. Do you want to use the cache? (YES/no)
-        // TODO: Check if repo existed
-        function createDirIfNotExisted(dir: string) {
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, {
-              recursive: true,
-            });
+        try {
+          await octokit.request<Stargazer[]>({
+            method: 'get',
+            url: `/repos/${OWNER}/${REPO}`,
+          });
+        } catch (error) {
+          if (error.status === 404) {
+            throw new Error(`Repository ${OWNER}/${REPO} not found.`);
           }
+          throw error;
         }
         const CACHE_FOLDER = path.join('.cache', `${OWNER}-${REPO}`);
         // Each repo has its own cache folder
@@ -179,12 +195,8 @@ const actionHandler = async () => {
           'output_followers.json',
         );
 
-        const octokit = new Octokit({
-          auth: TOKEN,
-        });
-
-        function appendStargazersToFile(stargazers: Stagazer[]) {
-          let data = [] as Stagazer[];
+        function appendStargazersToFile(stargazers: Stargazer[]) {
+          let data = [] as Stargazer[];
           if (fs.existsSync(OUTPUT_STARGAZERS)) {
             try {
               data = JSON.parse(fs.readFileSync(OUTPUT_STARGAZERS, 'utf8'));
@@ -234,7 +246,7 @@ const actionHandler = async () => {
           console.log('Fetching page', page);
           // if hit rate limit => Print to console and exit
           try {
-            const response = await octokit.request<Stagazer[]>({
+            const response = await octokit.request<Stargazer[]>({
               method: 'get',
               url: `/repos/${OWNER}/${REPO}/stargazers?page=${page}&per_page=100`,
             });
@@ -313,20 +325,20 @@ const actionHandler = async () => {
           // Count number of followers (Checksum)
           const stargazers = JSON.parse(
             fs.readFileSync(OUTPUT_STARGAZERS, 'utf8'),
-          ) as Stagazer[];
+          ) as Stargazer[];
           console.log('Total stargazers', stargazers.length);
         }
 
         async function fetchAllStargazersWithDetails() {
           if (!fs.existsSync(OUTPUT_STARGAZERS)) {
             throw new Error(
-              'Stagazers file does not exist. Fetch stagazers first.',
+              'Stargazers file does not exist. Fetch stargazers first.',
             );
           }
 
           const stargazers = JSON.parse(
             fs.readFileSync(OUTPUT_STARGAZERS, 'utf8'),
-          ) as Stagazer[];
+          ) as Stargazer[];
 
           // Default Batch if not provided, unauthenticated mode is 5, authenticated mode is 100
           const BATCH_SIZE =
@@ -414,7 +426,7 @@ const actionHandler = async () => {
             username: user.login,
             numberOfFollowers: user.followers,
           }));
-          console.log(chalk.bgWhite(`Top 10 Stagazers with most followers:`));
+          console.log(chalk.bgWhite(`Top 10 Stargazers with most followers:`));
           console.table(topTen);
           console.log(
             chalk.green(
