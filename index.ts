@@ -466,3 +466,13 @@ const actionHandler = async () => {
 
 program.action(actionHandler);
 program.parse(process.argv);
+
+// TODO: If we clear cache in `.cache` folder without clear `owner/repo`, weird behavior (such as duplicate stargazers, cannot open .json file...) happens
+// Idea 1: Save `.cache` and `owner/repo` same folder to easily managing cache
+
+// TODO: Current implementation (0.0.2): last page = page with 0 stargazers. Once reach last page, when re-run, the stargazers list is never updated again. This is a buggy implementation
+// Proposed approach: Always re-fetch last page (since there might be new stargazers since last run). We can assert total of stargazers is same as last time to decide if we need to re-fetch last page.
+// In general:
+// - No more isLastPage
+// - currentPage should not be a page with 0 stargazers (should be current last page - 1)
+// - might need to cache totalStargazers
