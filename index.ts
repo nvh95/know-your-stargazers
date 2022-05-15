@@ -472,6 +472,7 @@ program.parse(process.argv);
 
 // TODO: Current implementation (0.0.2): last page = page with 0 stargazers. Once reach last page, when re-run, the stargazers list is never updated again. This is a buggy implementation
 // Proposed approach: Always re-fetch last page (since there might be new stargazers since last run). We can assert total of stargazers is same as last time to decide if we need to re-fetch last page.
+// (Note that total of stargazers might not be the perfect indicator since there might be some old stargazers un-starred. Not sure it's worth to cover this use case, or users can just rerun without cache)
 // In general:
 // - No more isLastPage
 // - currentPage should not be a page with 0 stargazers (should be current last page - 1)
