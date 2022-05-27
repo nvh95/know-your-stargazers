@@ -209,7 +209,10 @@ const actionHandler = async () => {
           fs.writeFileSync(OUTPUT_STARGAZERS, JSON.stringify(newData, null, 2));
         }
 
-        function handleError(error: RequestError) {
+        function handleError(
+          error: RequestError,
+          { throwError = true }: { throwError: boolean } = { throwError: true },
+        ) {
           if (error.response.headers['x-ratelimit-remaining'] === '0') {
             console.error(
               chalk.red(
@@ -230,7 +233,9 @@ const actionHandler = async () => {
             throw new Error('Rate limit reached.');
           }
           // Just throw unexpeted error
-          throw error;
+          if (throwError) {
+            throw error;
+          }
         }
 
         async function fetchPage(page: number): Promise<StarListResult> {
@@ -296,7 +301,7 @@ const actionHandler = async () => {
             return response.data;
           } catch (error) {
             console.log(error);
-            handleError(error);
+            handleError(error, { throwError: false });
           }
         }
 
